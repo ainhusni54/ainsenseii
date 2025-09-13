@@ -8,7 +8,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplikasi Latihan Menulis Nama</title>
+    <title>Jejak Nama Saya</title>
     <!-- Tailwind CSS untuk styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -111,7 +111,6 @@
 </div>
 
 <script>
-    // Inisialisasi variabel dan elemen DOM
     const canvas = document.getElementById('writingCanvas');
     const ctx = canvas.getContext('2d');
     const studentNameInput = document.getElementById('studentName');
@@ -125,13 +124,14 @@
     let nameToTrace = '';
     let currentCharacterIndex = 0;
     let guidingLines = [];
+    // ✨ Auto-fit: pembolehubah global untuk skala
+    let currentFontSize = 0;
+    let letterGapPx = 0;
 
-    // Kanvas off-screen untuk mengesan penjejakan
     const offscreenCanvas = document.createElement('canvas');
     const offscreenCtx = offscreenCanvas.getContext('2d');
     let totalGuidingPixels = 0;
-    
-    // Saiz kanvas responsif
+
     function resizeCanvas() {
         const container = canvas.parentElement;
         canvas.width = container.offsetWidth;
@@ -146,7 +146,6 @@
     window.addEventListener('resize', resizeCanvas);
     window.addEventListener('load', resizeCanvas);
 
-    // Fungsi untuk memaparkan mesej sementara di skrin
     function showMessage(msg, duration = 2000) {
         messageBox.textContent = msg;
         messageBox.classList.add('show');
@@ -155,8 +154,6 @@
         }, duration);
     }
 
-    // Fungsi untuk memadamkan kanvas dan set semula keadaan
-    // ✨ Perubahan: tambah parameter preserveName untuk elak kosongkan input semasa mulakan latihan
     function clearCanvas(preserveName = false) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         offscreenCtx.clearRect(0, 0, offscreenCanvas.width, offscreenCanvas.height);
@@ -167,18 +164,15 @@
             nameToTrace = '';
             instructionDiv.textContent = 'Sila sentuh huruf untuk menaip nama anda.';
         }
-        // Lukis semula kanvas kosong jika ada masalah visual
         drawGuidingLines();
     }
 
-    // Fungsi untuk memulakan latihan
     startButton.addEventListener('click', () => {
         const typedName = studentNameInput.value.trim().toUpperCase();
         if (typedName === '') {
             showMessage('Sila masukkan nama terlebih dahulu.');
             return;
         }
-        // ✨ Perubahan: jangan kosongkan input/nama bila mula; gunakan preserveName=true
         clearCanvas(true);
         nameToTrace = typedName;
         guidingLines = [];
@@ -189,91 +183,101 @@
         updateInstruction();
     });
 
-    // Fungsi untuk padamkan kanvas (reset penuh)
     clearButton.addEventListener('click', () => clearCanvas(false));
 
-    // Fungsi untuk menjana garisan panduan untuk setiap huruf
     function generateGuidingLines() {
-        const fontSize = canvas.height * 0.5;
-        // Gunakan font yang lebih universal untuk memastikan ia berfungsi pada semua peranti
-        ctx.font = `${fontSize}px sans-serif`;
+        if (!nameToTrace) return;
+        const targetWidth = canvas.width * 0.9;   // guna 90% lebar kanvas
+        const maxFS = canvas.height * 0.6;        // had atas saiz font (ikut tinggi kanvas)
+        const minFS = canvas.height * 0.15;       // had bawah (elak terlalu kecil)
+
+        // Kira jumlah lebar teks + jurang untuk sesuatu fontSize
+        const measureWith = (fs) => {
+            ctx.font = `${fs}px sans-serif`;
+            const gap = fs * 0.15; // jurang proporsional kepada saiz font
+            let total = 0;
+            for (let i = 0; i < nameToTrace.length; i++) {
+                total += ctx.measureText(nameToTrace[i]).width;
+                if (i < nameToTrace.length - 1) total += gap;
+            }
+            return { total, gap };
+        };
+
+        // Binary search untuk dapatkan saiz font terbesar yang masih muat
+        let lo = minFS, hi = maxFS, bestFS = minFS, bestGap = minFS * 0.15;
+        for (let it = 0; it < 22; it++) { // 22 iterasi cukup tepat
+            const mid = (lo + hi) / 2;
+            const { total, gap } = measureWith(mid);
+            if (total <= targetWidth) { bestFS = mid; bestGap = gap; lo = mid; }
+            else { hi = mid; }
+        }
+        currentFontSize = bestFS;
+        letterGapPx = bestGap;
+
+        // Penjajaran dan pengiraan kedudukan huruf
+        ctx.font = `${currentFontSize}px sans-serif`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
 
         guidingLines = [];
-        const letterGap = canvas.width * 0.03;
         let totalWidth = 0;
         for (let i = 0; i < nameToTrace.length; i++) {
             totalWidth += ctx.measureText(nameToTrace[i]).width;
-            if (i < nameToTrace.length - 1) {
-                totalWidth += letterGap;
-            }
+            if (i < nameToTrace.length - 1) totalWidth += letterGapPx;
         }
-
         let startX = (canvas.width - totalWidth) / 2;
         const startY = canvas.height / 2;
 
         for (let i = 0; i < nameToTrace.length; i++) {
             const letter = nameToTrace[i];
-            const letterWidth = ctx.measureText(letter).width;
-            guidingLines.push({
-                x: startX + letterWidth / 2,
-                y: startY,
-                letter: letter
-            });
-            startX += letterWidth + letterGap;
+            const lw = ctx.measureText(letter).width;
+            guidingLines.push({ x: startX + lw / 2, y: startY, letter });
+            startX += lw + letterGapPx;
         }
-        
-        // Lukis panduan huruf semasa ke kanvas off-screen untuk penjejakan
+
+        // Sediakan piksel panduan huruf semasa pada offscreen untuk threshold kejayaan
         offscreenCtx.clearRect(0, 0, offscreenCanvas.width, offscreenCanvas.height);
         if (currentCharacterIndex < nameToTrace.length) {
-            const currentLine = guidingLines[currentCharacterIndex];
-            offscreenCtx.font = `${canvas.height * 0.5}px sans-serif`;
+            const cur = guidingLines[currentCharacterIndex];
+            offscreenCtx.font = `${currentFontSize}px sans-serif`;
             offscreenCtx.textAlign = 'center';
             offscreenCtx.textBaseline = 'middle';
             offscreenCtx.fillStyle = 'rgba(0,0,0,1)';
-            offscreenCtx.fillText(currentLine.letter, currentLine.x, currentLine.y);
-            
-            // Kira jumlah piksel panduan
+            offscreenCtx.fillText(cur.letter, cur.x, cur.y);
             const imageData = offscreenCtx.getImageData(0, 0, offscreenCanvas.width, offscreenCanvas.height);
             totalGuidingPixels = 0;
             for (let i = 0; i < imageData.data.length; i += 4) {
-                if (imageData.data[i+3] > 0) {
-                    totalGuidingPixels++;
-                }
+                if (imageData.data[i+3] > 0) totalGuidingPixels++;
             }
-            offscreenCtx.clearRect(0, 0, offscreenCanvas.width, offscreenCanvas.height); // Padamkan untuk siap sedia dilukis oleh pengguna
+            offscreenCtx.clearRect(0, 0, offscreenCanvas.width, offscreenCanvas.height);
         }
     }
 
-    // Fungsi untuk melukis garisan panduan
     function drawGuidingLines() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        ctx.font = `${canvas.height * 0.5}px sans-serif`;
+        ctx.font = `${currentFontSize || canvas.height * 0.5}px sans-serif`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
+
+        const activeStroke = Math.max(2, (currentFontSize || canvas.height * 0.5) * 0.06);
 
         guidingLines.forEach((line, index) => {
             if (index < currentCharacterIndex) {
                 ctx.fillStyle = 'rgba(76, 175, 80, 0.5)';
                 ctx.fillText(line.letter, line.x, line.y);
-            } 
-            else if (index === currentCharacterIndex) {
+            } else if (index === currentCharacterIndex) {
                 ctx.setLineDash([10, 10]);
                 ctx.strokeStyle = 'rgba(0, 0, 255, 0.7)';
-                ctx.lineWidth = 3;
+                ctx.lineWidth = activeStroke;
                 ctx.strokeText(line.letter, line.x, line.y);
                 ctx.setLineDash([]);
-            } 
-            else {
+            } else {
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
                 ctx.fillText(line.letter, line.x, line.y);
             }
         });
     }
 
-    // Fungsi untuk mengemaskini arahan di bawah kanvas
     function updateInstruction() {
         if (currentCharacterIndex < nameToTrace.length) {
             instructionDiv.textContent = `Sekarang, jejak huruf '${nameToTrace[currentCharacterIndex]}'.`;
@@ -283,7 +287,6 @@
         }
     }
 
-    // Handle event mouse dan sentuhan untuk melukis
     function getPosition(event) {
         const rect = canvas.getBoundingClientRect();
         const scaleX = canvas.width / rect.width;
@@ -298,10 +301,7 @@
             clientY = event.clientY;
         }
 
-        return {
-            x: (clientX - rect.left) * scaleX,
-            y: (clientY - rect.top) * scaleY
-        };
+        return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY };
     }
 
     function startDrawing(event) {
@@ -319,14 +319,14 @@
         if (!isDrawing) return;
         event.preventDefault();
         const pos = getPosition(event);
-        ctx.lineWidth = 10;
+        const lineW = Math.max(6, (currentFontSize || canvas.height * 0.5) * 0.18);
+        ctx.lineWidth = lineW;
         ctx.lineCap = 'round';
         ctx.strokeStyle = '#2563eb';
         ctx.lineTo(pos.x, pos.y);
         ctx.stroke();
-        
-        // Lukis juga pada kanvas off-screen
-        offscreenCtx.lineWidth = 20;
+
+        offscreenCtx.lineWidth = lineW * 1.6;
         offscreenCtx.lineCap = 'round';
         offscreenCtx.strokeStyle = 'rgba(0,0,0,1)';
         offscreenCtx.lineTo(pos.x, pos.y);
@@ -338,22 +338,18 @@
         isDrawing = false;
         ctx.closePath();
         offscreenCtx.closePath();
-        
-        // Semak sama ada huruf telah dijejak
+
         if (checkTracingSuccess()) {
             currentCharacterIndex++;
-            // Sediakan piksel panduan untuk huruf seterusnya
             generateGuidingLines();
             drawGuidingLines();
             updateInstruction();
             showMessage('Bagus! Berjaya dijejak.');
         } else {
-            // Jika penjejakan gagal, padamkan lukisan pengguna sahaja dan biarkan huruf panduan kekal
-            ctx.clearRect(0, 0, canvas.width, canvas.height); // Padamkan lukisan pengguna
-            drawGuidingLines(); // Lukis semula panduan yang telah di-clear
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawGuidingLines();
             offscreenCtx.clearRect(0, 0, offscreenCanvas.width, offscreenCanvas.height);
-            // ✨ Perubahan: set semula font sebelum tulis huruf panduan ke offscreen
-            offscreenCtx.font = `${canvas.height * 0.5}px sans-serif`;
+            offscreenCtx.font = ctx.font;
             offscreenCtx.textAlign = 'center';
             offscreenCtx.textBaseline = 'middle';
             offscreenCtx.fillStyle = 'rgba(0,0,0,1)';
@@ -361,45 +357,39 @@
             showMessage("Sila cuba lagi!");
         }
     }
-    
-    // Fungsi untuk menyemak kejayaan penjejakan
+
     function checkTracingSuccess() {
         const imageData = offscreenCtx.getImageData(0, 0, offscreenCanvas.width, offscreenCanvas.height);
         let tracedPixels = 0;
         for (let i = 0; i < imageData.data.length; i += 4) {
-            if (imageData.data[i+3] > 0) { // Piksel yang bukan kosong
-                tracedPixels++;
-            }
+            if (imageData.data[i+3] > 0) tracedPixels++;
         }
-        const successThreshold = 0.3; // 30%
+        const successThreshold = 0.3;
         return totalGuidingPixels > 0 && (tracedPixels / totalGuidingPixels) > successThreshold;
     }
 
-    // Event listeners untuk mouse dan sentuhan
     canvas.addEventListener('mousedown', startDrawing);
     canvas.addEventListener('mouseup', stopDrawing);
-    canvas.addEventListener('mouseleave', stopDrawing); // ✨ tambahan, untuk desktop
+    canvas.addEventListener('mouseleave', stopDrawing);
     canvas.addEventListener('mousemove', draw);
 
     canvas.addEventListener('touchstart', startDrawing, {passive:false});
     canvas.addEventListener('touchend', stopDrawing);
-    canvas.addEventListener('touchcancel', stopDrawing); // ✨ tambahan, untuk mobile
+    canvas.addEventListener('touchcancel', stopDrawing);
     canvas.addEventListener('touchmove', draw, {passive:false});
 
-    // Mula-mula, jana papan kekunci apabila halaman dimuatkan
     window.onload = function() {
         resizeCanvas();
         generateKeyboard();
     };
-    
-    // Fungsi untuk menjana papan kekunci
+
     function generateKeyboard() {
         const keyboardRows = [
             'QWERTYUIOP'.split(''),
             'ASDFGHJKL'.split(''),
             'ZXCVBNM'.split('')
         ];
-        
+
         keyboardRows.forEach(row => {
             const rowDiv = document.createElement('div');
             rowDiv.className = 'flex justify-center gap-2 w-full';
@@ -412,32 +402,4 @@
                 });
                 rowDiv.appendChild(button);
             });
-            keyboardDiv.appendChild(rowDiv);
-        });
-
-        // Baris untuk Spacebar dan Backspace
-        const specialKeysRow = document.createElement('div');
-        specialKeysRow.className = 'flex justify-center items-center gap-2 w-full mt-2';
-        
-        const spaceButton = document.createElement('button');
-        spaceButton.innerHTML = 'Ruang'; 
-        spaceButton.className = 'special-btn flex-grow py-3 rounded-lg shadow transition duration-300 text-lg sm:text-2xl';
-        spaceButton.addEventListener('click', () => {
-            studentNameInput.value += ' ';
-        });
-        specialKeysRow.appendChild(spaceButton);
-
-        const backspaceButton = document.createElement('button');
-        backspaceButton.textContent = '⌫';
-        backspaceButton.className = 'delete-btn py-3 px-3 rounded-lg shadow transition duration-300 text-lg sm:text-2xl aspect-square';
-        backspaceButton.addEventListener('click', () => {
-            studentNameInput.value = studentNameInput.value.slice(0, -1);
-        });
-        specialKeysRow.appendChild(backspaceButton);
-        
-        keyboardDiv.appendChild(specialKeysRow);
-    }
-</script>
-
-</body>
-</html>
+            keyboardDiv.appendChild(row
