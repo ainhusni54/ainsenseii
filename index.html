@@ -6,111 +6,71 @@
 <!DOCTYPE html>
 <html lang="ms">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jejak Nama Saya</title>
-    <!-- Tailwind CSS untuk styling -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f0f4f8;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 800px;
-            padding: 20px;
-        }
-
-        .message-box {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #4caf50;
-            color: white;
-            padding: 15px 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            opacity: 0;
-            transition: opacity 0.5s ease-in-out;
-            z-index: 1000;
-        }
-
-        .message-box.show {
-            opacity: 1;
-        }
-
-        .keyboard-btn {
-            background-color: #fca5a5; /* Warna pink cerah */
-            color: #444;
-            font-weight: bold;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
-            transition: transform 0.1s ease-in-out, background-color 0.1s ease-in-out;
-        }
-        .keyboard-btn:hover {
-            background-color: #fecaca; /* Warna pink lebih cerah saat hover */
-            transform: scale(1.05);
-        }
-        .special-btn {
-            background-color: #fcd34d; /* Warna kuning */
-        }
-        .special-btn:hover {
-            background-color: #fde68a; /* Warna kuning lebih cerah saat hover */
-        }
-        .delete-btn {
-            background-color: #f87171; /* Warna merah */
-        }
-        .delete-btn:hover {
-            background-color: #fca5a5; /* Warna merah lebih cerah saat hover */
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aplikasi Latihan Menulis Nama</title>
+  <!-- Tailwind CSS untuk styling -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f0f4f8;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .container { width: 100%; max-width: 800px; padding: 20px; }
+    .message-box {
+      position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+      background-color: #4caf50; color: white; padding: 15px 30px; border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1); opacity: 0; transition: opacity .5s ease-in-out; z-index: 1000;
+    }
+    .message-box.show { opacity: 1; }
+    .keyboard-btn {
+      background-color: #fca5a5; color: #444; font-weight: bold; border-radius: .5rem;
+      box-shadow: 0 4px 6px rgba(0,0,0,.1), 0 1px 3px rgba(0,0,0,.08);
+      transition: transform .1s ease-in-out, background-color .1s ease-in-out;
+      display: flex; align-items: center; justify-content: center;
+      min-width: 2.75rem; min-height: 2.75rem; /* fallback Safari */
+    }
+    .keyboard-btn:hover { background-color: #fecaca; transform: scale(1.05); }
+    .special-btn { background-color: #fcd34d; }
+    .special-btn:hover { background-color: #fde68a; }
+    .delete-btn { background-color: #f87171; }
+    .delete-btn:hover { background-color: #fca5a5; }
+  </style>
 </head>
 <body>
-
-<div class="container bg-white rounded-3xl shadow-xl p-8">
+  <div class="container bg-white rounded-3xl shadow-xl p-8">
     <div class="text-center mb-8">
-        <h1 class="text-4xl font-bold text-gray-800">Aplikasi Jejak Nama Ceria</h1>
-        <p class="mt-2 text-lg text-gray-600">Alat bantu digital untuk murid sindrom Down menulis nama.</p>
+      <h1 class="text-4xl font-bold text-gray-800">Aplikasi Jejak Nama Ceria</h1>
+      <p class="mt-2 text-lg text-gray-600">Alat bantu digital untuk murid sindrom Down menulis nama.</p>
     </div>
 
     <div class="mb-6">
-        <label for="studentName" class="block text-gray-700 text-sm font-bold mb-2">Masukkan Nama Anda:</label>
-        <input type="text" id="studentName" class="shadow appearance-none border rounded-xl w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="Contoh: Ali" readonly>
+      <label for="studentName" class="block text-gray-700 text-sm font-bold mb-2">Masukkan Nama Anda:</label>
+      <input type="text" id="studentName" class="shadow appearance-none border rounded-xl w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="Contoh: Ali" readonly />
     </div>
 
-    <div class="flex justify-center space-x-4 mb-8">
-        <button id="startButton" class="bg-emerald-400 hover:bg-emerald-500 text-white font-bold py-2 px-6 rounded-xl shadow-lg transition duration-300">
-            Mulakan Latihan
-        </button>
-        <button id="clearButton" class="bg-orange-400 hover:bg-orange-500 text-white font-bold py-2 px-6 rounded-xl shadow-lg transition duration-300">
-            Padamkan
-        </button>
+    <div class="flex justify-center gap-4 mb-8 flex-wrap">
+      <button id="startButton" class="bg-emerald-400 hover:bg-emerald-500 text-white font-bold py-2 px-6 rounded-xl shadow-lg transition duration-300">Mulakan Latihan</button>
+      <button id="clearButton" class="bg-orange-400 hover:bg-orange-500 text-white font-bold py-2 px-6 rounded-xl shadow-lg transition duration-300">Padamkan</button>
     </div>
-    
-    <div id="keyboard" class="flex flex-col items-center gap-2 p-4 bg-purple-200 rounded-xl shadow-inner mb-6">
-        <!-- Butang-butang huruf akan dijana di sini oleh JavaScript -->
-    </div>
+
+    <div id="keyboard" class="flex flex-col items-center gap-2 p-4 bg-purple-200 rounded-xl shadow-inner mb-6"></div>
 
     <div class="canvas-container relative w-full border-4 border-dashed border-purple-300 rounded-2xl overflow-hidden" style="padding-bottom: 75%; height: 0;">
-        <canvas id="writingCanvas" class="absolute inset-0 w-full h-full bg-white"></canvas>
+      <canvas id="writingCanvas" class="absolute inset-0 w-full h-full bg-white"></canvas>
     </div>
 
-    <div id="instruction" class="mt-6 text-center text-gray-600 italic">
-        Sila sentuh huruf untuk menaip nama anda.
-    </div>
+    <div id="instruction" class="mt-6 text-center text-gray-600 italic">Sila sentuh huruf untuk menaip nama anda.</div>
 
     <div id="messageBox" class="message-box"></div>
-</div>
+  </div>
 
-<script>
+  <script>
+    // --- Elemen & keadaan ---
     const canvas = document.getElementById('writingCanvas');
     const ctx = canvas.getContext('2d');
     const studentNameInput = document.getElementById('studentName');
@@ -124,282 +84,235 @@
     let nameToTrace = '';
     let currentCharacterIndex = 0;
     let guidingLines = [];
-    // ✨ Auto-fit: pembolehubah global untuk skala
+    // Auto-fit
     let currentFontSize = 0;
     let letterGapPx = 0;
 
+    // Offscreen untuk kiraan piksel
     const offscreenCanvas = document.createElement('canvas');
     const offscreenCtx = offscreenCanvas.getContext('2d');
     let totalGuidingPixels = 0;
 
-    function resizeCanvas() {
-        const container = canvas.parentElement;
-        canvas.width = container.offsetWidth;
-        canvas.height = container.offsetHeight;
-        offscreenCanvas.width = canvas.width;
-        offscreenCanvas.height = canvas.height;
-        if (nameToTrace) {
-            generateGuidingLines();
-            drawGuidingLines();
-        }
-    }
-    window.addEventListener('resize', resizeCanvas);
-    window.addEventListener('load', resizeCanvas);
-
+    // --- Utiliti UI ---
     function showMessage(msg, duration = 2000) {
-        messageBox.textContent = msg;
-        messageBox.classList.add('show');
-        setTimeout(() => {
-            messageBox.classList.remove('show');
-        }, duration);
+      messageBox.textContent = msg; messageBox.classList.add('show');
+      setTimeout(() => messageBox.classList.remove('show'), duration);
     }
 
+    // --- Saiz kanvas responsif ---
+    function resizeCanvas() {
+      const container = canvas.parentElement;
+      canvas.width = container.offsetWidth;
+      canvas.height = container.offsetHeight;
+      offscreenCanvas.width = canvas.width;
+      offscreenCanvas.height = canvas.height;
+      if (nameToTrace) { generateGuidingLines(); drawGuidingLines(); }
+    }
+    window.addEventListener('resize', resizeCanvas, { passive: true });
+
+    // --- Reset/padam ---
     function clearCanvas(preserveName = false) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        offscreenCtx.clearRect(0, 0, offscreenCanvas.width, offscreenCanvas.height);
-        guidingLines = [];
-        currentCharacterIndex = 0;
-        if (!preserveName) {
-            studentNameInput.value = '';
-            nameToTrace = '';
-            instructionDiv.textContent = 'Sila sentuh huruf untuk menaip nama anda.';
-        }
-        drawGuidingLines();
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      offscreenCtx.clearRect(0, 0, offscreenCanvas.width, offscreenCanvas.height);
+      guidingLines = []; currentCharacterIndex = 0;
+      if (!preserveName) { studentNameInput.value = ''; nameToTrace = ''; instructionDiv.textContent = 'Sila sentuh huruf untuk menaip nama anda.'; }
+      drawGuidingLines();
     }
 
-    startButton.addEventListener('click', () => {
-        const typedName = studentNameInput.value.trim().toUpperCase();
-        if (typedName === '') {
-            showMessage('Sila masukkan nama terlebih dahulu.');
-            return;
-        }
-        clearCanvas(true);
-        nameToTrace = typedName;
-        guidingLines = [];
-        currentCharacterIndex = 0;
-        generateGuidingLines();
-        drawGuidingLines();
-        showMessage('Mula menjejak huruf pertama!');
-        updateInstruction();
-    });
-
-    clearButton.addEventListener('click', () => clearCanvas(false));
-
+    // --- Auto-fit & kedudukan huruf ---
     function generateGuidingLines() {
-        if (!nameToTrace) return;
-        const targetWidth = canvas.width * 0.9;   // guna 90% lebar kanvas
-        const maxFS = canvas.height * 0.6;        // had atas saiz font (ikut tinggi kanvas)
-        const minFS = canvas.height * 0.15;       // had bawah (elak terlalu kecil)
+      if (!nameToTrace) return;
+      const targetWidth = canvas.width * 0.9;
+      const maxFS = canvas.height * 0.6;
+      const minFS = canvas.height * 0.15;
 
-        // Kira jumlah lebar teks + jurang untuk sesuatu fontSize
-        const measureWith = (fs) => {
-            ctx.font = `${fs}px sans-serif`;
-            const gap = fs * 0.15; // jurang proporsional kepada saiz font
-            let total = 0;
-            for (let i = 0; i < nameToTrace.length; i++) {
-                total += ctx.measureText(nameToTrace[i]).width;
-                if (i < nameToTrace.length - 1) total += gap;
-            }
-            return { total, gap };
-        };
-
-        // Binary search untuk dapatkan saiz font terbesar yang masih muat
-        let lo = minFS, hi = maxFS, bestFS = minFS, bestGap = minFS * 0.15;
-        for (let it = 0; it < 22; it++) { // 22 iterasi cukup tepat
-            const mid = (lo + hi) / 2;
-            const { total, gap } = measureWith(mid);
-            if (total <= targetWidth) { bestFS = mid; bestGap = gap; lo = mid; }
-            else { hi = mid; }
-        }
-        currentFontSize = bestFS;
-        letterGapPx = bestGap;
-
-        // Penjajaran dan pengiraan kedudukan huruf
-        ctx.font = `${currentFontSize}px sans-serif`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-
-        guidingLines = [];
-        let totalWidth = 0;
+      const measureWith = (fs) => {
+        ctx.font = `${fs}px sans-serif`;
+        const gap = fs * 0.15;
+        let total = 0;
         for (let i = 0; i < nameToTrace.length; i++) {
-            totalWidth += ctx.measureText(nameToTrace[i]).width;
-            if (i < nameToTrace.length - 1) totalWidth += letterGapPx;
+          total += ctx.measureText(nameToTrace[i]).width;
+          if (i < nameToTrace.length - 1) total += gap;
         }
-        let startX = (canvas.width - totalWidth) / 2;
-        const startY = canvas.height / 2;
+        return { total, gap };
+      };
 
-        for (let i = 0; i < nameToTrace.length; i++) {
-            const letter = nameToTrace[i];
-            const lw = ctx.measureText(letter).width;
-            guidingLines.push({ x: startX + lw / 2, y: startY, letter });
-            startX += lw + letterGapPx;
-        }
+      let lo = minFS, hi = maxFS, bestFS = minFS, bestGap = minFS * 0.15;
+      for (let it = 0; it < 22; it++) {
+        const mid = (lo + hi) / 2;
+        const { total, gap } = measureWith(mid);
+        if (total <= targetWidth) { bestFS = mid; bestGap = gap; lo = mid; } else { hi = mid; }
+      }
+      currentFontSize = bestFS; letterGapPx = bestGap;
 
-        // Sediakan piksel panduan huruf semasa pada offscreen untuk threshold kejayaan
+      ctx.font = `${currentFontSize}px sans-serif`;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+
+      guidingLines = [];
+      let totalWidth = 0;
+      for (let i = 0; i < nameToTrace.length; i++) {
+        totalWidth += ctx.measureText(nameToTrace[i]).width;
+        if (i < nameToTrace.length - 1) totalWidth += letterGapPx;
+      }
+      let startX = (canvas.width - totalWidth) / 2;
+      const startY = canvas.height / 2;
+      for (let i = 0; i < nameToTrace.length; i++) {
+        const letter = nameToTrace[i];
+        const lw = ctx.measureText(letter).width;
+        guidingLines.push({ x: startX + lw / 2, y: startY, letter });
+        startX += lw + letterGapPx;
+      }
+
+      // Kira piksel panduan huruf semasa
+      offscreenCtx.clearRect(0, 0, offscreenCanvas.width, offscreenCanvas.height);
+      if (currentCharacterIndex < nameToTrace.length) {
+        const cur = guidingLines[currentCharacterIndex];
+        offscreenCtx.font = `${currentFontSize}px sans-serif`;
+        offscreenCtx.textAlign = 'center'; offscreenCtx.textBaseline = 'middle';
+        offscreenCtx.fillStyle = 'rgba(0,0,0,1)';
+        offscreenCtx.fillText(cur.letter, cur.x, cur.y);
+        const imageData = offscreenCtx.getImageData(0, 0, offscreenCanvas.width, offscreenCanvas.height);
+        totalGuidingPixels = 0;
+        for (let i = 0; i < imageData.data.length; i += 4) if (imageData.data[i+3] > 0) totalGuidingPixels++;
         offscreenCtx.clearRect(0, 0, offscreenCanvas.width, offscreenCanvas.height);
-        if (currentCharacterIndex < nameToTrace.length) {
-            const cur = guidingLines[currentCharacterIndex];
-            offscreenCtx.font = `${currentFontSize}px sans-serif`;
-            offscreenCtx.textAlign = 'center';
-            offscreenCtx.textBaseline = 'middle';
-            offscreenCtx.fillStyle = 'rgba(0,0,0,1)';
-            offscreenCtx.fillText(cur.letter, cur.x, cur.y);
-            const imageData = offscreenCtx.getImageData(0, 0, offscreenCanvas.width, offscreenCanvas.height);
-            totalGuidingPixels = 0;
-            for (let i = 0; i < imageData.data.length; i += 4) {
-                if (imageData.data[i+3] > 0) totalGuidingPixels++;
-            }
-            offscreenCtx.clearRect(0, 0, offscreenCanvas.width, offscreenCanvas.height);
-        }
+      }
     }
 
+    // --- Lukis panduan ---
     function drawGuidingLines() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.font = `${currentFontSize || canvas.height * 0.5}px sans-serif`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.font = `${currentFontSize || canvas.height * 0.5}px sans-serif`;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
 
-        const activeStroke = Math.max(2, (currentFontSize || canvas.height * 0.5) * 0.06);
-
-        guidingLines.forEach((line, index) => {
-            if (index < currentCharacterIndex) {
-                ctx.fillStyle = 'rgba(76, 175, 80, 0.5)';
-                ctx.fillText(line.letter, line.x, line.y);
-            } else if (index === currentCharacterIndex) {
-                ctx.setLineDash([10, 10]);
-                ctx.strokeStyle = 'rgba(0, 0, 255, 0.7)';
-                ctx.lineWidth = activeStroke;
-                ctx.strokeText(line.letter, line.x, line.y);
-                ctx.setLineDash([]);
-            } else {
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
-                ctx.fillText(line.letter, line.x, line.y);
-            }
-        });
+      const activeStroke = Math.max(2, (currentFontSize || canvas.height * 0.5) * 0.06);
+      guidingLines.forEach((line, index) => {
+        if (index < currentCharacterIndex) {
+          ctx.fillStyle = 'rgba(76, 175, 80, 0.5)'; ctx.fillText(line.letter, line.x, line.y);
+        } else if (index === currentCharacterIndex) {
+          ctx.setLineDash([10, 10]);
+          ctx.strokeStyle = 'rgba(0, 0, 255, 0.7)'; ctx.lineWidth = activeStroke; ctx.strokeText(line.letter, line.x, line.y);
+          ctx.setLineDash([]);
+        } else {
+          ctx.fillStyle = 'rgba(0,0,0,0.1)'; ctx.fillText(line.letter, line.x, line.y);
+        }
+      });
     }
 
+    // --- Arahan ---
     function updateInstruction() {
-        if (currentCharacterIndex < nameToTrace.length) {
-            instructionDiv.textContent = `Sekarang, jejak huruf '${nameToTrace[currentCharacterIndex]}'.`;
-        } else {
-            instructionDiv.textContent = 'Tahniah! Anda telah berjaya menulis nama anda!';
-            showMessage('Kerja yang bagus! Tahniah!');
-        }
+      if (currentCharacterIndex < nameToTrace.length) {
+        instructionDiv.textContent = `Sekarang, jejak huruf '${nameToTrace[currentCharacterIndex]}'.`;
+      } else {
+        instructionDiv.textContent = 'Tahniah! Anda telah berjaya menulis nama anda!';
+        showMessage('Kerja yang bagus! Tahniah!');
+      }
     }
 
+    // --- Input pointer ---
     function getPosition(event) {
-        const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
-        let clientX, clientY;
-
-        if (event.touches && event.touches.length > 0) {
-            clientX = event.touches[0].clientX;
-            clientY = event.touches[0].clientY;
-        } else {
-            clientX = event.clientX;
-            clientY = event.clientY;
-        }
-
-        return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY };
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width; const scaleY = canvas.height / rect.height;
+      let clientX, clientY;
+      if (event.touches && event.touches.length > 0) { clientX = event.touches[0].clientX; clientY = event.touches[0].clientY; }
+      else { clientX = event.clientX; clientY = event.clientY; }
+      return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY };
     }
 
     function startDrawing(event) {
-        if (!nameToTrace || currentCharacterIndex >= nameToTrace.length) return;
-        event.preventDefault();
-        isDrawing = true;
-        const pos = getPosition(event);
-        ctx.beginPath();
-        ctx.moveTo(pos.x, pos.y);
-        offscreenCtx.beginPath();
-        offscreenCtx.moveTo(pos.x, pos.y);
+      if (!nameToTrace || currentCharacterIndex >= nameToTrace.length) return;
+      event.preventDefault(); isDrawing = true; const pos = getPosition(event);
+      ctx.beginPath(); ctx.moveTo(pos.x, pos.y);
+      offscreenCtx.beginPath(); offscreenCtx.moveTo(pos.x, pos.y);
     }
 
     function draw(event) {
-        if (!isDrawing) return;
-        event.preventDefault();
-        const pos = getPosition(event);
-        const lineW = Math.max(6, (currentFontSize || canvas.height * 0.5) * 0.18);
-        ctx.lineWidth = lineW;
-        ctx.lineCap = 'round';
-        ctx.strokeStyle = '#2563eb';
-        ctx.lineTo(pos.x, pos.y);
-        ctx.stroke();
-
-        offscreenCtx.lineWidth = lineW * 1.6;
-        offscreenCtx.lineCap = 'round';
-        offscreenCtx.strokeStyle = 'rgba(0,0,0,1)';
-        offscreenCtx.lineTo(pos.x, pos.y);
-        offscreenCtx.stroke();
+      if (!isDrawing) return; event.preventDefault(); const pos = getPosition(event);
+      const lineW = Math.max(6, (currentFontSize || canvas.height * 0.5) * 0.18);
+      ctx.lineWidth = lineW; ctx.lineCap = 'round'; ctx.strokeStyle = '#2563eb';
+      ctx.lineTo(pos.x, pos.y); ctx.stroke();
+      offscreenCtx.lineWidth = lineW * 1.6; offscreenCtx.lineCap = 'round'; offscreenCtx.strokeStyle = 'rgba(0,0,0,1)';
+      offscreenCtx.lineTo(pos.x, pos.y); offscreenCtx.stroke();
     }
 
     function stopDrawing() {
-        if (!isDrawing) return;
-        isDrawing = false;
-        ctx.closePath();
-        offscreenCtx.closePath();
-
-        if (checkTracingSuccess()) {
-            currentCharacterIndex++;
-            generateGuidingLines();
-            drawGuidingLines();
-            updateInstruction();
-            showMessage('Bagus! Berjaya dijejak.');
-        } else {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            drawGuidingLines();
-            offscreenCtx.clearRect(0, 0, offscreenCanvas.width, offscreenCanvas.height);
-            offscreenCtx.font = ctx.font;
-            offscreenCtx.textAlign = 'center';
-            offscreenCtx.textBaseline = 'middle';
-            offscreenCtx.fillStyle = 'rgba(0,0,0,1)';
-            offscreenCtx.fillText(guidingLines[currentCharacterIndex].letter, guidingLines[currentCharacterIndex].x, guidingLines[currentCharacterIndex].y);
-            showMessage("Sila cuba lagi!");
-        }
+      if (!isDrawing) return; isDrawing = false; ctx.closePath(); offscreenCtx.closePath();
+      if (checkTracingSuccess()) {
+        currentCharacterIndex++; generateGuidingLines(); drawGuidingLines(); updateInstruction(); showMessage('Bagus! Berjaya dijejak.');
+      } else {
+        ctx.clearRect(0, 0, canvas.width, canvas.height); drawGuidingLines();
+        offscreenCtx.clearRect(0, 0, offscreenCanvas.width, offscreenCanvas.height);
+        offscreenCtx.font = `${currentFontSize || canvas.height * 0.5}px sans-serif`;
+        offscreenCtx.textAlign = 'center'; offscreenCtx.textBaseline = 'middle'; offscreenCtx.fillStyle = 'rgba(0,0,0,1)';
+        offscreenCtx.fillText(guidingLines[currentCharacterIndex].letter, guidingLines[currentCharacterIndex].x, guidingLines[currentCharacterIndex].y);
+        showMessage('Sila cuba lagi!');
+      }
     }
 
     function checkTracingSuccess() {
-        const imageData = offscreenCtx.getImageData(0, 0, offscreenCanvas.width, offscreenCanvas.height);
-        let tracedPixels = 0;
-        for (let i = 0; i < imageData.data.length; i += 4) {
-            if (imageData.data[i+3] > 0) tracedPixels++;
-        }
-        const successThreshold = 0.3;
-        return totalGuidingPixels > 0 && (tracedPixels / totalGuidingPixels) > successThreshold;
+      const imageData = offscreenCtx.getImageData(0, 0, offscreenCanvas.width, offscreenCanvas.height);
+      let tracedPixels = 0; for (let i = 0; i < imageData.data.length; i += 4) if (imageData.data[i+3] > 0) tracedPixels++;
+      const successThreshold = 0.3; return totalGuidingPixels > 0 && (tracedPixels / totalGuidingPixels) > successThreshold;
     }
 
+    // --- Events ---
     canvas.addEventListener('mousedown', startDrawing);
     canvas.addEventListener('mouseup', stopDrawing);
     canvas.addEventListener('mouseleave', stopDrawing);
     canvas.addEventListener('mousemove', draw);
 
-    canvas.addEventListener('touchstart', startDrawing, {passive:false});
+    canvas.addEventListener('touchstart', startDrawing, { passive: false });
     canvas.addEventListener('touchend', stopDrawing);
     canvas.addEventListener('touchcancel', stopDrawing);
-    canvas.addEventListener('touchmove', draw, {passive:false});
+    canvas.addEventListener('touchmove', draw, { passive: false });
 
-    window.onload = function() {
-        resizeCanvas();
-        generateKeyboard();
-    };
+    // --- Init (satu indeks/html) ---
+    document.addEventListener('DOMContentLoaded', () => {
+      generateKeyboard();
+      resizeCanvas();
+    });
 
     function generateKeyboard() {
-        const keyboardRows = [
-            'QWERTYUIOP'.split(''),
-            'ASDFGHJKL'.split(''),
-            'ZXCVBNM'.split('')
-        ];
+      if (keyboardDiv.childElementCount) return; // elak gandaan
+      const keyboardRows = [ 'QWERTYUIOP'.split(''), 'ASDFGHJKL'.split(''), 'ZXCVBNM'.split('') ];
 
-        keyboardRows.forEach(row => {
-            const rowDiv = document.createElement('div');
-            rowDiv.className = 'flex justify-center gap-2 w-full';
-            row.forEach(letter => {
-                const button = document.createElement('button');
-                button.textContent = letter;
-                button.className = 'keyboard-btn aspect-square flex-1 text-lg sm:text-2xl';
-                button.addEventListener('click', () => {
-                    studentNameInput.value += letter;
-                });
-                rowDiv.appendChild(button);
-            });
-            keyboardDiv.appendChild(row
+      keyboardRows.forEach(row => {
+        const rowDiv = document.createElement('div');
+        rowDiv.className = 'flex justify-center gap-2 flex-wrap';
+        row.forEach(letter => {
+          const button = document.createElement('button');
+          button.textContent = letter;
+          button.className = 'keyboard-btn w-12 h-12 sm:w-14 sm:h-14 text-lg sm:text-2xl';
+          button.addEventListener('click', () => { studentNameInput.value += letter; });
+          rowDiv.appendChild(button);
+        });
+        keyboardDiv.appendChild(rowDiv);
+      });
+
+      const specialKeysRow = document.createElement('div');
+      specialKeysRow.className = 'flex justify-center items-center gap-2 flex-wrap mt-2';
+
+      const spaceButton = document.createElement('button');
+      spaceButton.innerHTML = 'Ruang';
+      spaceButton.className = 'special-btn py-3 px-6 rounded-lg shadow transition duration-300 text-lg sm:text-2xl';
+      spaceButton.addEventListener('click', () => { studentNameInput.value += ' '; });
+      specialKeysRow.appendChild(spaceButton);
+
+      const backspaceButton = document.createElement('button');
+      backspaceButton.textContent = '⌫';
+      backspaceButton.className = 'delete-btn py-3 px-3 rounded-lg shadow transition duration-300 text-lg sm:text-2xl';
+      backspaceButton.addEventListener('click', () => { studentNameInput.value = studentNameInput.value.slice(0, -1); });
+      specialKeysRow.appendChild(backspaceButton);
+
+      keyboardDiv.appendChild(specialKeysRow);
+    }
+
+    // Butang
+    startButton.addEventListener('click', () => {
+      const typedName = studentNameInput.value.trim().toUpperCase();
+      if (!typedName) { showMessage('Sila masukkan nama terlebih dahulu.'); return; }
+      clearCanvas(true); nameToTrace = typedName; generateGuidingLines(); drawGuidingLines(); updateInstruction(); showMessage('Mula menjejak huruf pertama!');
+    });
+    clearButton.addEventListener('click', () => clearCanvas(false));
+  </script>
+</body>
+</html>
