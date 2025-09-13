@@ -8,7 +8,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Aplikasi Latihan Menulis Nama</title>
+  <title>Jejak Nama Saya</title>
   <!-- Tailwind CSS untuk styling -->
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
@@ -26,13 +26,13 @@
     }
     .message-box.show { opacity: 1; }
     .keyboard-btn {
-      background-color: #fca5a5; color: #444; font-weight: bold; border-radius: .5rem;
+      background-color: #bfdbfe; /* biru lembut */ color: #444; font-weight: bold; border-radius: .5rem;
       box-shadow: 0 4px 6px rgba(0,0,0,.1), 0 1px 3px rgba(0,0,0,.08);
       transition: transform .1s ease-in-out, background-color .1s ease-in-out;
       display: flex; align-items: center; justify-content: center;
       min-width: 2.75rem; min-height: 2.75rem; /* fallback Safari */
     }
-    .keyboard-btn:hover { background-color: #fecaca; transform: scale(1.05); }
+    .keyboard-btn:hover { background-color: #dbeafe;  transform: scale(1.05); }
     .special-btn { background-color: #fcd34d; }
     .special-btn:hover { background-color: #fde68a; }
     .delete-btn { background-color: #f87171; }
@@ -42,7 +42,7 @@
 <body>
   <div class="container bg-white rounded-3xl shadow-xl p-8">
     <div class="text-center mb-8">
-      <h1 class="text-4xl font-bold text-gray-800">Aplikasi Jejak Nama Ceria</h1>
+      <h1 class="text-4xl font-bold text-gray-800">Jejak Nama Saya</h1>
       <p class="mt-2 text-lg text-gray-600">Alat bantu digital untuk murid sindrom Down menulis nama.</p>
     </div>
 
@@ -56,9 +56,9 @@
       <button id="clearButton" class="bg-orange-400 hover:bg-orange-500 text-white font-bold py-2 px-6 rounded-xl shadow-lg transition duration-300">Padamkan</button>
     </div>
 
-    <div id="keyboard" class="flex flex-col items-center gap-2 p-4 bg-purple-200 rounded-xl shadow-inner mb-6"></div>
+    <div id="keyboard" class="flex flex-col items-center gap-2 p-4 bg-yellow-100 rounded-xl shadow-inner mb-6"></div>
 
-    <div class="canvas-container relative w-full border-4 border-dashed border-purple-300 rounded-2xl overflow-hidden" style="padding-bottom: 75%; height: 0;">
+    <div class="canvas-container relative w-full border-4 border-dashed border-blue-300 rounded-2xl overflow-hidden" style="padding-bottom: 75%; height: 0;">
       <canvas id="writingCanvas" class="absolute inset-0 w-full h-full bg-white"></canvas>
     </div>
 
@@ -191,7 +191,7 @@
       ctx.font = `${currentFontSize || canvas.height * 0.5}px sans-serif`;
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
 
-      const activeStroke = Math.max(2, (currentFontSize || canvas.height * 0.5) * 0.06);
+      const activeStroke = Math.max(1.5, (currentFontSize || canvas.height * 0.5) * 0.04);
       guidingLines.forEach((line, index) => {
         if (index < currentCharacterIndex) {
           ctx.fillStyle = 'rgba(76, 175, 80, 0.5)'; ctx.fillText(line.letter, line.x, line.y);
@@ -239,7 +239,7 @@
 
     function draw(event) {
       if (!isDrawing) return; event.preventDefault(); const pos = getPosition(event);
-      const lineW = Math.max(6, (currentFontSize || canvas.height * 0.5) * 0.18);
+      const lineW = Math.max(2, (currentFontSize || canvas.height * 0.5) * 0.08);
       drawCtx.lineWidth = lineW; drawCtx.lineCap = 'round'; drawCtx.strokeStyle = 'rgba(37,99,235,1)';
       drawCtx.lineTo(pos.x, pos.y); drawCtx.stroke();
       // kira panjang pergerakan untuk elak tap kecil dianggap siap
@@ -261,6 +261,7 @@
           drawGuidingLines();
           updateInstruction();
           showMessage('Kerja yang bagus! Tahniah!');
+          playApplause();
         }
       } else {
         // Gagal: kosongkan lakaran pengguna SAHAJA
@@ -291,6 +292,29 @@
       const coverage = overlap / tplCount;
       const successThreshold = 0.55; // liputan 55% daripada bentuk huruf
       return coverage >= successThreshold;
+    }
+
+    function playApplause() {
+      try {
+        const ctxA = new (window.AudioContext || window.webkitAudioContext)();
+        const bursts = 12;
+        for (let i = 0; i < bursts; i++) {
+          const start = ctxA.currentTime + i * 0.05 + Math.random() * 0.03;
+          const bufferSize = Math.floor(ctxA.sampleRate * 0.2);
+          const buffer = ctxA.createBuffer(1, bufferSize, ctxA.sampleRate);
+          const data = buffer.getChannelData(0);
+          for (let j = 0; j < buffer.length; j++) {
+            data[j] = (Math.random() * 2 - 1) * Math.exp(-j / (buffer.length * 0.9));
+          }
+          const src = ctxA.createBufferSource();
+          src.buffer = buffer;
+          const gain = ctxA.createGain();
+          gain.gain.value = 0.15;
+          src.connect(gain).connect(ctxA.destination);
+          src.start(start);
+          src.stop(start + 0.2);
+        }
+      } catch (e) {}
     }
 
     // --- Events ---
