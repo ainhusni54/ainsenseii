@@ -1,5 +1,5 @@
 <!-- 
-  Aplikasi web ini direka untuk membantu kanak-kanak sindrom Down berlatih menulis nama mereka.
+  Aplikasi web ini direka untuk membantu kanak-kanak sindrom Down berlatih menulis nama.
   Ia menggunakan ciri interaktif dengan panduan visual dan maklum balas.
   Keseluruhan aplikasi, termasuk HTML, CSS, dan JavaScript, berada dalam satu fail.
 -->
@@ -125,63 +125,12 @@
     let nameToTrace = '';
     let currentCharacterIndex = 0;
     let guidingLines = [];
-    let tracedPaths = []; // Untuk menyimpan lukisan yang berjaya
-    
+
     // Kanvas off-screen untuk mengesan penjejakan
     const offscreenCanvas = document.createElement('canvas');
     const offscreenCtx = offscreenCanvas.getContext('2d');
     let totalGuidingPixels = 0;
     
-    // Inisialisasi Web Audio API
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    const audioCtx = new AudioContext();
-
-    // Fungsi untuk mainkan bunyi kejayaan (bunyi chime)
-    function playChimeSound() {
-        const oscillator = audioCtx.createOscillator();
-        const gainNode = audioCtx.createGain();
-
-        oscillator.type = 'sine';
-        oscillator.frequency.value = 880; // A5
-        gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
-
-        oscillator.connect(gainNode);
-        gainNode.connect(audioCtx.destination);
-        
-        oscillator.start();
-        oscillator.stop(audioCtx.currentTime + 0.3);
-    }
-
-    // Fungsi untuk mainkan bunyi tepukan tangan
-    function playClappingSound() {
-        const bufferSize = 2 * audioCtx.sampleRate;
-        const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-        const output = buffer.getChannelData(0);
-
-        // Generate white noise
-        for (let i = 0; i < bufferSize; i++) {
-            output[i] = Math.random() * 2 - 1;
-        }
-
-        const whiteNoiseSource = audioCtx.createBufferSource();
-        whiteNoiseSource.buffer = buffer;
-        
-        const filter = audioCtx.createBiquadFilter();
-        filter.type = 'highpass';
-        filter.frequency.value = 2000;
-        
-        const noiseGain = audioCtx.createGain();
-        noiseGain.gain.setValueAtTime(1, audioCtx.currentTime);
-        noiseGain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
-        
-        whiteNoiseSource.connect(filter);
-        filter.connect(noiseGain);
-        noiseGain.connect(audioCtx.destination);
-        
-        whiteNoiseSource.start();
-    }
-
     // Saiz kanvas responsif
     function resizeCanvas() {
         const container = canvas.parentElement;
@@ -207,17 +156,18 @@
     }
 
     // Fungsi untuk memadamkan kanvas dan set semula keadaan
+    // ✨ Perubahan: tambah parameter preserveName untuk elak kosongkan input semasa mulakan latihan
     function clearCanvas(preserveName = false) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         offscreenCtx.clearRect(0, 0, offscreenCanvas.width, offscreenCanvas.height);
         guidingLines = [];
-        tracedPaths = [];
         currentCharacterIndex = 0;
         if (!preserveName) {
             studentNameInput.value = '';
             nameToTrace = '';
             instructionDiv.textContent = 'Sila sentuh huruf untuk menaip nama anda.';
         }
+        // Lukis semula kanvas kosong jika ada masalah visual
         drawGuidingLines();
     }
 
@@ -228,10 +178,12 @@
             showMessage('Sila masukkan nama terlebih dahulu.');
             return;
         }
+        // ✨ Perubahan: jangan kosongkan input/nama bila mula; gunakan preserveName=true
         clearCanvas(true);
         nameToTrace = typedName;
+        guidingLines = [];
+        currentCharacterIndex = 0;
         generateGuidingLines();
-        drawCurrentGuidingLetterAndCountPixels();
         drawGuidingLines();
         showMessage('Mula menjejak huruf pertama!');
         updateInstruction();
@@ -243,6 +195,7 @@
     // Fungsi untuk menjana garisan panduan untuk setiap huruf
     function generateGuidingLines() {
         const fontSize = canvas.height * 0.5;
+        // Gunakan font yang lebih universal untuk memastikan ia berfungsi pada semua peranti
         ctx.font = `${fontSize}px sans-serif`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
@@ -270,10 +223,8 @@
             });
             startX += letterWidth + letterGap;
         }
-    }
-
-    // Fungsi untuk melukis panduan huruf semasa dan mengira piksel
-    function drawCurrentGuidingLetterAndCountPixels() {
+        
+        // Lukis panduan huruf semasa ke kanvas off-screen untuk penjejakan
         offscreenCtx.clearRect(0, 0, offscreenCanvas.width, offscreenCanvas.height);
         if (currentCharacterIndex < nameToTrace.length) {
             const currentLine = guidingLines[currentCharacterIndex];
@@ -282,7 +233,8 @@
             offscreenCtx.textBaseline = 'middle';
             offscreenCtx.fillStyle = 'rgba(0,0,0,1)';
             offscreenCtx.fillText(currentLine.letter, currentLine.x, currentLine.y);
-
+            
+            // Kira jumlah piksel panduan
             const imageData = offscreenCtx.getImageData(0, 0, offscreenCanvas.width, offscreenCanvas.height);
             totalGuidingPixels = 0;
             for (let i = 0; i < imageData.data.length; i += 4) {
@@ -290,38 +242,31 @@
                     totalGuidingPixels++;
                 }
             }
-            offscreenCtx.clearRect(0, 0, offscreenCanvas.width, offscreenCanvas.height);
+            offscreenCtx.clearRect(0, 0, offscreenCanvas.width, offscreenCanvas.height); // Padamkan untuk siap sedia dilukis oleh pengguna
         }
     }
 
     // Fungsi untuk melukis garisan panduan
     function drawGuidingLines() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-
+        
         ctx.font = `${canvas.height * 0.5}px sans-serif`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
 
-        // Lukis huruf yang telah dijejak (lukisan pengguna)
-        ctx.strokeStyle = '#2563eb';
-        ctx.lineWidth = 10;
-        ctx.lineCap = 'round';
-        tracedPaths.forEach(path => {
-            ctx.beginPath();
-            ctx.moveTo(path[0].x, path[0].y);
-            path.slice(1).forEach(p => ctx.lineTo(p.x, p.y));
-            ctx.stroke();
-        });
-
-        // Lukiskan huruf panduan
         guidingLines.forEach((line, index) => {
-            if (index === currentCharacterIndex) {
+            if (index < currentCharacterIndex) {
+                ctx.fillStyle = 'rgba(76, 175, 80, 0.5)';
+                ctx.fillText(line.letter, line.x, line.y);
+            } 
+            else if (index === currentCharacterIndex) {
                 ctx.setLineDash([10, 10]);
                 ctx.strokeStyle = 'rgba(0, 0, 255, 0.7)';
                 ctx.lineWidth = 3;
                 ctx.strokeText(line.letter, line.x, line.y);
                 ctx.setLineDash([]);
-            } else {
+            } 
+            else {
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
                 ctx.fillText(line.letter, line.x, line.y);
             }
@@ -332,12 +277,9 @@
     function updateInstruction() {
         if (currentCharacterIndex < nameToTrace.length) {
             instructionDiv.textContent = `Sekarang, jejak huruf '${nameToTrace[currentCharacterIndex]}'.`;
-            playChimeSound(); // Bunyi chime untuk setiap huruf yang berjaya dijejak
         } else {
             instructionDiv.textContent = 'Tahniah! Anda telah berjaya menulis nama anda!';
             showMessage('Kerja yang bagus! Tahniah!');
-            // Bunyi kejayaan akhir apabila semua huruf dijejak
-            playClappingSound();
         }
     }
 
@@ -362,14 +304,11 @@
         };
     }
 
-    let currentPath = [];
     function startDrawing(event) {
         if (!nameToTrace || currentCharacterIndex >= nameToTrace.length) return;
         event.preventDefault();
         isDrawing = true;
-        currentPath = [];
         const pos = getPosition(event);
-        currentPath.push(pos);
         ctx.beginPath();
         ctx.moveTo(pos.x, pos.y);
         offscreenCtx.beginPath();
@@ -380,14 +319,13 @@
         if (!isDrawing) return;
         event.preventDefault();
         const pos = getPosition(event);
-        currentPath.push(pos);
-        
         ctx.lineWidth = 10;
         ctx.lineCap = 'round';
         ctx.strokeStyle = '#2563eb';
         ctx.lineTo(pos.x, pos.y);
         ctx.stroke();
-
+        
+        // Lukis juga pada kanvas off-screen
         offscreenCtx.lineWidth = 20;
         offscreenCtx.lineCap = 'round';
         offscreenCtx.strokeStyle = 'rgba(0,0,0,1)';
@@ -400,63 +338,39 @@
         isDrawing = false;
         ctx.closePath();
         offscreenCtx.closePath();
-
-        const success = checkTracingSuccess();
         
-        if (success) {
-            tracedPaths.push(currentPath);
+        // Semak sama ada huruf telah dijejak
+        if (checkTracingSuccess()) {
             currentCharacterIndex++;
-        } 
-        
-        // Padamkan lukisan pengguna sahaja dan lukis semula semua
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        drawGuidingLines();
-
-        if (success) {
-            if (currentCharacterIndex < nameToTrace.length) {
-                drawCurrentGuidingLetterAndCountPixels();
-                updateInstruction();
-                showMessage('Bagus! Berjaya dijejak.');
-            } else {
-                updateInstruction();
-            }
+            // Sediakan piksel panduan untuk huruf seterusnya
+            generateGuidingLines();
+            drawGuidingLines();
+            updateInstruction();
+            showMessage('Bagus! Berjaya dijejak.');
         } else {
-            drawCurrentGuidingLetterAndCountPixels();
+            // Jika penjejakan gagal, padamkan lukisan pengguna sahaja dan biarkan huruf panduan kekal
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // Padamkan lukisan pengguna
+            drawGuidingLines(); // Lukis semula panduan yang telah di-clear
+            offscreenCtx.clearRect(0, 0, offscreenCanvas.width, offscreenCanvas.height);
+            // ✨ Perubahan: set semula font sebelum tulis huruf panduan ke offscreen
+            offscreenCtx.font = `${canvas.height * 0.5}px sans-serif`;
+            offscreenCtx.textAlign = 'center';
+            offscreenCtx.textBaseline = 'middle';
+            offscreenCtx.fillStyle = 'rgba(0,0,0,1)';
+            offscreenCtx.fillText(guidingLines[currentCharacterIndex].letter, guidingLines[currentCharacterIndex].x, guidingLines[currentCharacterIndex].y);
             showMessage("Sila cuba lagi!");
         }
     }
     
     // Fungsi untuk menyemak kejayaan penjejakan
     function checkTracingSuccess() {
-        const currentLine = guidingLines[currentCharacterIndex];
-        const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = canvas.width;
-        tempCanvas.height = canvas.height;
-        const tempCtx = tempCanvas.getContext('2d');
-        tempCtx.font = `${canvas.height * 0.5}px sans-serif`;
-        tempCtx.textAlign = 'center';
-        tempCtx.textBaseline = 'middle';
-        tempCtx.fillStyle = 'rgba(0,0,0,1)';
-        tempCtx.fillText(currentLine.letter, currentLine.x, currentLine.y);
-
-        const guidingImageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
-        let totalGuidingPixels = 0;
-        for (let i = 0; i < guidingImageData.data.length; i += 4) {
-            if (guidingImageData.data[i+3] > 0) {
-                totalGuidingPixels++;
-            }
-        }
-
-        const tracedImageData = offscreenCtx.getImageData(0, 0, offscreenCanvas.width, offscreenCanvas.height);
+        const imageData = offscreenCtx.getImageData(0, 0, offscreenCanvas.width, offscreenCanvas.height);
         let tracedPixels = 0;
-        for (let i = 0; i < tracedImageData.data.length; i += 4) {
-            if (tracedImageData.data[i+3] > 0 && guidingImageData.data[i+3] > 0) {
+        for (let i = 0; i < imageData.data.length; i += 4) {
+            if (imageData.data[i+3] > 0) { // Piksel yang bukan kosong
                 tracedPixels++;
             }
         }
-        
-        offscreenCtx.clearRect(0, 0, offscreenCanvas.width, offscreenCanvas.height);
-
         const successThreshold = 0.3; // 30%
         return totalGuidingPixels > 0 && (tracedPixels / totalGuidingPixels) > successThreshold;
     }
@@ -464,12 +378,12 @@
     // Event listeners untuk mouse dan sentuhan
     canvas.addEventListener('mousedown', startDrawing);
     canvas.addEventListener('mouseup', stopDrawing);
-    canvas.addEventListener('mouseleave', stopDrawing);
+    canvas.addEventListener('mouseleave', stopDrawing); // ✨ tambahan, untuk desktop
     canvas.addEventListener('mousemove', draw);
 
     canvas.addEventListener('touchstart', startDrawing, {passive:false});
     canvas.addEventListener('touchend', stopDrawing);
-    canvas.addEventListener('touchcancel', stopDrawing);
+    canvas.addEventListener('touchcancel', stopDrawing); // ✨ tambahan, untuk mobile
     canvas.addEventListener('touchmove', draw, {passive:false});
 
     // Mula-mula, jana papan kekunci apabila halaman dimuatkan
@@ -477,7 +391,7 @@
         resizeCanvas();
         generateKeyboard();
     };
-
+    
     // Fungsi untuk menjana papan kekunci
     function generateKeyboard() {
         const keyboardRows = [
@@ -485,7 +399,7 @@
             'ASDFGHJKL'.split(''),
             'ZXCVBNM'.split('')
         ];
-
+        
         keyboardRows.forEach(row => {
             const rowDiv = document.createElement('div');
             rowDiv.className = 'flex justify-center gap-2 w-full';
@@ -504,9 +418,9 @@
         // Baris untuk Spacebar dan Backspace
         const specialKeysRow = document.createElement('div');
         specialKeysRow.className = 'flex justify-center items-center gap-2 w-full mt-2';
-
+        
         const spaceButton = document.createElement('button');
-        spaceButton.innerHTML = 'Ruang';
+        spaceButton.innerHTML = 'Ruang'; 
         spaceButton.className = 'special-btn flex-grow py-3 rounded-lg shadow transition duration-300 text-lg sm:text-2xl';
         spaceButton.addEventListener('click', () => {
             studentNameInput.value += ' ';
@@ -520,7 +434,7 @@
             studentNameInput.value = studentNameInput.value.slice(0, -1);
         });
         specialKeysRow.appendChild(backspaceButton);
-
+        
         keyboardDiv.appendChild(specialKeysRow);
     }
 </script>
